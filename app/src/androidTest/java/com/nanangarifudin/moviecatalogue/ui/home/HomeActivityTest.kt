@@ -19,7 +19,7 @@ import org.junit.Test
 class HomeActivityTest {
 
     private val dummyMovies = DataDummy.generateDummyMovies()
-    private val dummyTvShow = DataDummy.generateDummyTvShows()
+//    private val dummyTvShow = DataDummy.generateDummyTvShows()
 
     @get:Rule
     var activityRule = ActivityTestRule(HomeActivity::class.java)
@@ -41,12 +41,12 @@ class HomeActivityTest {
         onView(withId(R.id.rv_movies)).perform(RecyclerViewActions.scrollToPosition<RecyclerView.ViewHolder>(dummyMovies.size))
     }
 
-    @Test
-    fun loadTvShow(){
-        onView(withText("TV SHOW")).perform(click())
-        onView(withId(R.id.rv_tvshow)).check(matches(isDisplayed()))
-        onView(withId(R.id.rv_tvshow)).perform(RecyclerViewActions.scrollToPosition<RecyclerView.ViewHolder>(dummyTvShow.size))
-    }
+//    @Test
+//    fun loadTvShow(){
+//        onView(withText("TV SHOW")).perform(click())
+//        onView(withId(R.id.rv_tvshow)).check(matches(isDisplayed()))
+//        onView(withId(R.id.rv_tvshow)).perform(RecyclerViewActions.scrollToPosition<RecyclerView.ViewHolder>(dummyTvShow.size))
+//    }
 
     @Test
     fun loadDetailMovie(){
@@ -57,14 +57,14 @@ class HomeActivityTest {
         onView(withId(R.id.txtDescriptionDetail)).check(matches(withText(dummyMovies[0].overview)))
     }
 
-    @Test
-    fun loadDetailTVShow(){
-        onView(withText("TV SHOW")).perform(click())
-        onView(withId(R.id.rv_tvshow)).perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click()))
-        onView(withId(R.id.txtTitleDetail)).check(matches(isDisplayed()))
-        onView(withId(R.id.txtTitleDetail)).check(matches(withText(dummyTvShow[0].name)))
-        onView(withId(R.id.txtDescriptionDetail)).check(matches(isDisplayed()))
-        onView(withId(R.id.txtDescriptionDetail)).check(matches(withText(dummyTvShow[0].overview)))
-    }
+//    @Test
+//    fun loadDetailTVShow(){
+//        onView(withText("TV SHOW")).perform(click())
+//        onView(withId(R.id.rv_tvshow)).perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click()))
+//        onView(withId(R.id.txtTitleDetail)).check(matches(isDisplayed()))
+//        onView(withId(R.id.txtTitleDetail)).check(matches(withText(dummyTvShow[0].name)))
+//        onView(withId(R.id.txtDescriptionDetail)).check(matches(isDisplayed()))
+//        onView(withId(R.id.txtDescriptionDetail)).check(matches(withText(dummyTvShow[0].overview)))
+//    }
 
 }

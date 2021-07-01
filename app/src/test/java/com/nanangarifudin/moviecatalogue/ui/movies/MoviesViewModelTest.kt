@@ -1,10 +1,16 @@
 package com.nanangarifudin.moviecatalogue.ui.movies
 
+import android.graphics.Movie
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.nanangarifudin.moviecatalogue.data.MovieTVRepository
+import com.nanangarifudin.moviecatalogue.data.local.MovieEntity
+import com.nanangarifudin.moviecatalogue.data.remote.response.MovieItem
+import com.nanangarifudin.moviecatalogue.data.remote.response.MovieResponse
 import com.nanangarifudin.moviecatalogue.utils.DataDummy
+import com.nanangarifudin.moviecatalogue.utils.LiveDataTestUtil
+import com.nanangarifudin.moviecatalogue.vo.Resource
 import com.nhaarman.mockitokotlin2.verify
 import org.junit.Before
 import org.junit.Test
@@ -29,7 +35,7 @@ class MoviesViewModelTest {
     private lateinit var movieTVRepository: MovieTVRepository
 
     @Mock
-    private lateinit var observer: Observer<List<MovieResponse>>
+    private lateinit var observer: Observer<List<MovieItem>>
 
     @Before
     fun setUp() {
@@ -39,10 +45,10 @@ class MoviesViewModelTest {
 
     @Test
     fun getMovie() {
-        val movieResponse = MutableLiveData<List<MovieResponse>>()
+        val movieResponse = MutableLiveData<List<MovieItem>>()
         movieResponse.value = dummyMovie
 
-        Mockito.`when`(movieTVRepository.getMovies()).thenReturn(movieResponse)
+        Mockito.`when`(movieTVRepository.getMoviePopular(1)).thenReturn(movieResponse)
         val movies = viewModel.getMovies().value
 
         assertNotNull(movies)
@@ -51,4 +57,5 @@ class MoviesViewModelTest {
         viewModel.getMovies().observeForever(observer)
         verify(observer).onChanged(dummyMovie)
     }
+
 }

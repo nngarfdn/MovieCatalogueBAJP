@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.nanangarifudin.moviecatalogue.data.MovieTVRepository
 import com.nanangarifudin.moviecatalogue.di.Injection
 import com.nanangarifudin.moviecatalogue.ui.detail.DetailViewModel
+import com.nanangarifudin.moviecatalogue.ui.favorite.movie.FavoriteMovieViewModel
+import com.nanangarifudin.moviecatalogue.ui.favorite.tvshow.FavoriteTvShowViewModel
 import com.nanangarifudin.moviecatalogue.ui.movies.MoviesViewModel
 import com.nanangarifudin.moviecatalogue.ui.tvshow.TVShowViewModel
 
@@ -32,6 +34,15 @@ class ViewModelFactory private constructor(private val mAcademyRepository: Movie
             modelClass.isAssignableFrom(TVShowViewModel::class.java) -> {
                 TVShowViewModel(mAcademyRepository) as T
             }
+
+            modelClass.isAssignableFrom(FavoriteMovieViewModel::class.java) -> {
+                FavoriteMovieViewModel(mAcademyRepository) as T
+            }
+
+            modelClass.isAssignableFrom(FavoriteTvShowViewModel::class.java) -> {
+                FavoriteTvShowViewModel(mAcademyRepository) as T
+            }
+
             modelClass.isAssignableFrom(DetailViewModel::class.java) -> {
                 DetailViewModel(mAcademyRepository) as T
             }

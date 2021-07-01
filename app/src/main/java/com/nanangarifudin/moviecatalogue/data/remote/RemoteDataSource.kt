@@ -7,6 +7,7 @@ import com.nanangarifudin.moviecatalogue.R
 import com.nanangarifudin.moviecatalogue.data.remote.network.ApiConfig
 import com.nanangarifudin.moviecatalogue.data.remote.response.MovieDetailResponse
 import com.nanangarifudin.moviecatalogue.data.remote.response.MovieResponse
+import com.nanangarifudin.moviecatalogue.data.remote.response.TVDetailResponse
 import com.nanangarifudin.moviecatalogue.data.remote.response.TVResponse
 import com.nanangarifudin.moviecatalogue.utils.EspressoIdlingResource
 import com.nanangarifudin.moviecatalogue.utils.JsonHelper
@@ -39,8 +40,7 @@ class RemoteDataSource  {
     ) {
         EspressoIdlingResource.increment()
         val client: Call<MovieResponse> =
-            ApiConfig.getApiService().getMoviePopular("732012d703178472fe5df9861a323d1d"
-                , page)
+            ApiConfig.getApiService().getMoviePopular(APIKEY, page)
         client.enqueue(object : Callback<MovieResponse?> {
             override fun onResponse(
                 call: Call<MovieResponse?>,
@@ -87,6 +87,59 @@ class RemoteDataSource  {
     }
 
 
+    fun getTvPopular(
+        page: Int,
+        callback: LoadTVCallback
+    ) {
+        EspressoIdlingResource.increment()
+        val client: Call<TVResponse> =
+            ApiConfig.getApiService().getTVPopular(APIKEY, page)
+        client.enqueue(object : Callback<TVResponse?> {
+            override fun onResponse(
+                call: Call<TVResponse?>,
+                response: Response<TVResponse?>
+            ) {
+                if (response.isSuccessful) {
+                    if (response.body() != null) {
+                        callback.onAllTVReceived(response.body()!!)
+                        EspressoIdlingResource.decrement()
+                    }
+                } else Log.e(TAG, "onFailure: " + response.message())
+            }
+
+            override fun onFailure(call: Call<TVResponse?>, t: Throwable) {
+                Log.e(TAG, "onFailure: " + t.message)
+            }
+        })
+    }
+
+    fun getTvDetails(
+        id: Int,
+        callback: LoadTVByIdCallback
+    ) {
+        EspressoIdlingResource.increment()
+        val client: Call<TVDetailResponse> =
+            ApiConfig.getApiService().getTVDetails(id, APIKEY)
+        client.enqueue(object : Callback<TVDetailResponse?> {
+            override fun onResponse(
+                call: Call<TVDetailResponse?>,
+                response: Response<TVDetailResponse?>
+            ) {
+                if (response.isSuccessful()) {
+                    if (response.body() != null) {
+                        callback.onAllTVByIdReceived(response.body()!!)
+                        EspressoIdlingResource.decrement()
+                    }
+                } else Log.e(TAG, "onFailure: " + response.message())
+            }
+
+            override fun onFailure(call: Call<TVDetailResponse?>, t: Throwable) {
+                Log.e(TAG, "onFailure: " + t.message)
+            }
+        })
+    }
+
+
     interface LoadMoviesCallback {
         fun onAllMoviesReceived(movieResponse: MovieResponse)
     }
@@ -96,11 +149,11 @@ class RemoteDataSource  {
     }
 
     interface LoadTVByIdCallback {
-        fun onAllTVByIdReceived(tvResponse: TVResponse)
+        fun onAllTVByIdReceived(tvResponse: TVDetailResponse)
     }
 
     interface LoadTVCallback {
-        fun onAllTVReceived(movieResponse: List<TVResponse>)
+        fun onAllTVReceived(movieResponse: TVResponse)
     }
 
 }

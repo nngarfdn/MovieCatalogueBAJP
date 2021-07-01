@@ -22,31 +22,28 @@ class TvShowFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_tv_show, container, false)
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        if (activity != null){
-
-            val factory = ViewModelFactory.getInstance(requireActivity())
-            val viewModel = ViewModelProvider(this, factory)[TVShowViewModel::class.java]
-//            val tvAdapter = TvShowAdapter()
-            progress_bar.visibility = View.VISIBLE
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val factory = ViewModelFactory.getInstance(requireActivity())
+        val viewModel = ViewModelProvider(this, factory)[TVShowViewModel::class.java]
+        val tvAdapter = TvShowAdapter()
+        progress_bar.visibility = View.VISIBLE
 
 
-//            viewModel.getTvShow().observe(viewLifecycleOwner, { tvShow ->
-//                progress_bar.visibility = View.INVISIBLE
-//
-//                Log.d("load tv", "onActivityCreated: $tvShow")
-//                tvAdapter.setData(tvShow)
-//
-//                with(rv_tvshow) {
-//                    layoutManager = LinearLayoutManager(context)
-//                    setHasFixedSize(true)
-//                    adapter = tvAdapter
-//                }
-//            })
+        viewModel.getTvShow().observe(viewLifecycleOwner, { tvShow ->
+            progress_bar.visibility = View.INVISIBLE
 
-        }
+            Log.d("load tv", "onActivityCreated: $tvShow")
+            tvAdapter.setData(tvShow)
+
+            with(rv_tvshow) {
+                layoutManager = LinearLayoutManager(context)
+                setHasFixedSize(true)
+                adapter = tvAdapter
+            }
+        })
     }
+
 
 
 }

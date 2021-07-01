@@ -2,125 +2,109 @@ package com.nanangarifudin.moviecatalogue.data
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.paging.LivePagedListBuilder
+import androidx.paging.PagedList
+import com.nanangarifudin.moviecatalogue.data.local.LocalDataSource
+import com.nanangarifudin.moviecatalogue.data.local.MovieEntity
+import com.nanangarifudin.moviecatalogue.data.local.TvShowEntity
 import com.nanangarifudin.moviecatalogue.data.remote.RemoteDataSource
+import com.nanangarifudin.moviecatalogue.data.remote.response.*
 import com.nanangarifudin.moviecatalogue.data.source.MovieTVDataSource
+import com.nanangarifudin.moviecatalogue.utils.AppExecutors
 
-class FakeMovieTVRepository (private val remoteDataSource: RemoteDataSource) : MovieTVDataSource  {
+class FakeMovieTVRepository constructor(
+    private val remoteDataSource: RemoteDataSource,
+    private val localDataSource: LocalDataSource,
+    private val appExecutors: AppExecutors
+    ) : MovieTVDataSource  {
 
-    override fun getMovies(): LiveData<List<MovieResponse>> {
 
-        val courseResults = MutableLiveData<List<MovieResponse>>()
-        remoteDataSource.getAllMovies(object : RemoteDataSource.LoadMoviesCallback {
-            override fun onAllMoviesReceived(movieResponse: List<MovieResponse>) {
-                val courseList = ArrayList<MovieResponse>()
-                for (response in movieResponse) {
-                    val course = MovieResponse(
-                            response.adult,
-                            response.backdrop_path,
-                            response.genre_ids,
-                            response.id,
-                            response.original_language,
-                            response.original_title,
-                            response.overview,
-                            response.popularity,
-                            response.poster_path,
-                            response.release_date,
-                            response.title,
-                            response.video,
-                            response.vote_average,
-                            response.vote_count,
-                    )
-                    courseList.add(course)
-                }
-                courseResults.postValue(courseList)
+    override fun getMovieDetails(movieId: Int): MutableLiveData<MovieDetailResponse> {
+        val result: MutableLiveData<MovieDetailResponse> = MutableLiveData<MovieDetailResponse>()
+        remoteDataSource.getMovieDetails(movieId, object : RemoteDataSource.LoadMovieByIdCallback{
+            override fun onAllMovieByIdReceived(movieResponse: MovieDetailResponse) {
+                var mov = movieResponse
+                result.postValue(mov)
+            }
+        })
+        return result
+    }
+
+    override fun getMoviePopular(page: Int): MutableLiveData<List<MovieItem>> {
+        val courseResults = MutableLiveData<List<MovieItem>>()
+        remoteDataSource.getMoviePopular(1, object : RemoteDataSource.LoadMoviesCallback {
+            override fun onAllMoviesReceived(movieResponse: MovieResponse) {
+                var courseList = movieResponse.results
+                courseResults.postValue(courseList!!)
             }
         })
         return courseResults
     }
 
-    override fun getTVshow(): LiveData<List<TVResponse>> {
-        val courseResults = MutableLiveData<List<TVResponse>>()
-        remoteDataSource.getAllTV(object : RemoteDataSource.LoadTVCallback {
-            override fun onAllTVReceived(movieResponse: List<TVResponse>) {
-                val courseList = ArrayList<TVResponse>()
-                for (response in movieResponse) {
-                    val course = TVResponse(
-                            response.backdrop_path,
-                            response.first_air_date,
-                            response.genre_ids,
-                            response.id,
-                            response.name,
-                            response.origin_country,
-                            response.original_language,
-                            response.original_name,
-                            response.overview,
-                            response.popularity,
-                            response.poster_path,
-                            response.vote_average,
-                            response.vote_count,
-                    )
-                    courseList.add(course)
-                }
-                courseResults.postValue(courseList)
+    override fun getAllFavoriteMovies(): LiveData<PagedList<MovieEntity>>{
+        val config = PagedList.Config.Builder()
+            .setEnablePlaceholders(false)
+            .setInitialLoadSizeHint(4)
+            .setPageSize(4)
+            .build()
+        return LivePagedListBuilder(localDataSource.getBookmarkedMovies(), config).build()
+    }
+
+    override fun insertFavoriteMovie(movieEntity: MovieEntity) {
+        appExecutors.diskIO().execute { localDataSource.insertMovies(movieEntity) }
+    }
+
+    override fun getFavoriteMovieById(movieId: Int): LiveData<MovieEntity> {
+        return localDataSource.getBookmarkMovieById(movieId)
+    }
+
+    override fun deleteFAvoriteMovie(movieId: Int) {
+        appExecutors.diskIO().execute { localDataSource.deleteFavorite(movieId) }
+    }
+
+    override fun getTvPopular(page: Int): MutableLiveData<List<TVItem>> {
+        val courseResults = MutableLiveData<List<TVItem>>()
+        remoteDataSource.getTvPopular(1, object : RemoteDataSource.LoadTVCallback{
+            override fun onAllTVReceived(movieResponse: TVResponse) {
+                var courseList = movieResponse.results
+                courseResults.postValue(courseList!!)
             }
         })
         return courseResults
     }
 
-    override fun getMovieById(movieId: Int): LiveData<MovieResponse> {
-        val courseResults = MutableLiveData<MovieResponse>()
-        remoteDataSource.getAllMovieById(object : RemoteDataSource.LoadMovieByIdCallback {
-            override fun onAllMovieByIdReceived(movieResponse: MovieResponse) {
-                val course = MovieResponse(
-                        movieResponse.adult,
-                        movieResponse.backdrop_path,
-                        movieResponse.genre_ids,
-                        movieResponse.id,
-                        movieResponse.original_language,
-                        movieResponse.original_title,
-                        movieResponse.overview,
-                        movieResponse.popularity,
-                        movieResponse.poster_path,
-                        movieResponse.release_date,
-                        movieResponse.title,
-                        movieResponse.video,
-                        movieResponse.vote_average,
-                        movieResponse.vote_count,
-                )
-                courseResults.postValue(course)
+    override fun getTvDetails(tvId: Int): MutableLiveData<TVDetailResponse> {
+        val result: MutableLiveData<TVDetailResponse> = MutableLiveData<TVDetailResponse>()
+        remoteDataSource.getTvDetails(tvId, object : RemoteDataSource.LoadTVByIdCallback{
+            override fun onAllTVByIdReceived(tvResponse: TVDetailResponse) {
+                var mov = tvResponse
+                result.postValue(mov)
             }
+        })
+        return result
+    }
 
-        }, movieId)
+    override fun getAllFavoriteTv(): LiveData<PagedList<TvShowEntity>> {
+        val config = PagedList.Config.Builder()
+            .setEnablePlaceholders(false)
+            .setInitialLoadSizeHint(4)
+            .setPageSize(4)
+            .build()
+        return LivePagedListBuilder(localDataSource.getBookmarkedTvs(), config).build()
+    }
 
-        return courseResults
+    override fun insertFavoriteTv(tvEntity: TvShowEntity) {
+        appExecutors.diskIO().execute { localDataSource.insertTvs(tvEntity) }
+    }
+
+    override fun getFavoriteTvById(tvId: Int): LiveData<TvShowEntity> {
+        return localDataSource.getBookmarkTvById(tvId)
+    }
+
+    override fun deleteFAvoriteTv(tvId: Int) {
+        appExecutors.diskIO().execute { localDataSource.deleteFavoriteTv(tvId) }
     }
 
 
-    override fun getTVById(movieId: Int): LiveData<TVResponse> {
-        val courseResults = MutableLiveData<TVResponse>()
-        remoteDataSource.getAllTVById(object : RemoteDataSource.LoadTVByIdCallback{
-            override fun onAllTVByIdReceived(tvResponse: TVResponse) {
-                val course = TVResponse(
-                        tvResponse.backdrop_path,
-                        tvResponse.first_air_date,
-                        tvResponse.genre_ids,
-                        tvResponse.id,
-                        tvResponse.name,
-                        tvResponse.origin_country,
-                        tvResponse.original_language,
-                        tvResponse.original_name,
-                        tvResponse.overview,
-                        tvResponse.popularity,
-                        tvResponse.poster_path,
-                        tvResponse.vote_average,
-                        tvResponse.vote_count,
-                )
-                courseResults.postValue(course)
-            }
-
-        }, movieId)
-
-        return courseResults
-    }
 
 }

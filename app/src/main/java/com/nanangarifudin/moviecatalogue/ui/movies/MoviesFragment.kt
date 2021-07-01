@@ -22,29 +22,27 @@ class MoviesFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_movies, container, false)
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        if (activity != null) {
-            val factory = ViewModelFactory.getInstance(requireActivity())
-            val viewModel = ViewModelProvider(this, factory)[MoviesViewModel::class.java]
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-            val moviesAdapter = MoviesAdapter()
+        val factory = ViewModelFactory.getInstance(requireActivity())
+        val viewModel = ViewModelProvider(this, factory)[MoviesViewModel::class.java]
 
-            progress_bar.visibility = View.VISIBLE
-            viewModel.getMovies().observe(viewLifecycleOwner, { movies ->
-                progress_bar.visibility = View.INVISIBLE
-                moviesAdapter.setData(movies)
+        val moviesAdapter = MoviesAdapter()
 
-                with(rv_movies) {
-                    layoutManager = LinearLayoutManager(context)
-                    setHasFixedSize(true)
-                    adapter = moviesAdapter
-                }
-            })
+        progress_bar.visibility = View.VISIBLE
+        viewModel.getMovies().observe(viewLifecycleOwner, { movies ->
+            progress_bar.visibility = View.INVISIBLE
+            moviesAdapter.setData(movies)
 
-
-        }
+            with(rv_movies) {
+                layoutManager = LinearLayoutManager(context)
+                setHasFixedSize(true)
+                adapter = moviesAdapter
+            }
+        })
     }
+
 
 
 }
